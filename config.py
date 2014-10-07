@@ -10,36 +10,43 @@ from generate.segment.halfsquare import HalfSquareSegment
 path = './generated_data'
 
 #definition of creating dataset
-dataset = [	
-	# first type of trajectories
-	{					
-		'name': 'normal',					
-		#count of creating trajectories
-		'count': 10,
-		#definition of trajectories by segments
-		'segments': [					
-			CubeSegment(10, step=0.5, distortionMin=-5, distortionMax=5),
-			MinusCubeSegment(10),
-			ArcSegment(10),
-			DownLineSegment(10),
-			UpLineSegment(10),
-			FullSquareSegment(10),
-			HalfSquareSegment(10),
-		]
-	},
-	#another type of trajectories
-	{
-		'name': 'bad',					
-		'count': 10,
-		'segments': [
-			CubeSegment(10, step=0.5),
-			MinusCubeSegment(10),
-			ArcSegment(10),
-			DownLineSegment(10),
-			DownLineSegment(10),
-			UpLineSegment(10),
-			FullSquareSegment(10),
-			HalfSquareSegment(10),
-		]
-	}
-]
+dataset = {
+	'aliases': {
+		'A': CubeSegment(10),
+		'B': MinusCubeSegment(10),
+		'C': ArcSegment(10),
+		'D': DownLineSegment(10),
+		'E': UpLineSegment(10),
+		'F': FullSquareSegment(10),
+		'G': HalfSquareSegment(10),
+		'H': CubeSegment(10)
+	},	
+
+	'classes': {
+		# first type of trajectories
+		'normal': {							
+			#count of creating trajectories
+			'count': 10,
+			#count of segments
+			'length': 10,		
+		},
+
+		#another type of trajectories
+		'bad1': {										
+			#count of creating trajectories
+			'count': 10,
+			#count of segments
+			'length': 10, 
+			'abnormalSequence': 'ABCD'
+		},
+
+		#another type of trajectories
+		'bad2_': {										
+			#count of creating trajectories
+			'count': 10,
+			#count of segments
+			'length': 10, 
+			'abnormalSequence': 'BBB'
+		}
+	}	
+}
