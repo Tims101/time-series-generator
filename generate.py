@@ -18,7 +18,7 @@ def find_all(a_str, sub):
         start = a_str.find(sub, start)
         if start == -1: return
         yield start
-        start += len(sub) # use start += 1 to find overlapping matches
+        start += 1
 
 def generateSegmentsFromString(string):
 	result = []
@@ -26,28 +26,65 @@ def generateSegmentsFromString(string):
 		result.append(aliases[char])
 	return result		
 
-def generateSegments(data):
-	length = data['length']	
+def getRandomSubstring(length):
 	result = ''
-
 	for i in range(length):
 		result += random.choice(alphabet)
+	return result
 
-	if 'abnormalSequence' in data:
-		abnormal = data['abnormalSequence']		
-		abnormal_length = len(abnormal)		
-		occurences = list(find_all(result, data['abnormalSequence']))
-		if len(occurences) >= 2:
-			for i in range(1, len(occurences)):
-				#TODO: remove bad things
-				result[i, i + abnormal_length] = ''.join(random.sample(abnormal, abnormal_length))
-		elif len(occurences) == 0: 
-			pos = random.randint(0, length - abnormal_length)
-			result = result[:pos] + data['abnormalSequence'] + result[pos + abnormal_length:]			
-		print(result.replace(abnormal, '_{0}_'.format(abnormal)))
-	else:
-		print(result)	
-	
+
+def getOccurencesCount(str, substrings):
+	count = 0
+	for substr in substrings:
+		count += len(list(find_all(str, substr)))
+	return count
+
+#very bad code
+def generateSegments(data):
+	length = data['length']	
+	result = getRandomSubstring(length)
+	do_again = False
+
+	while (True):
+
+		if 'abnormalSequence' in data:
+			abnormal = data['abnormalSequence']		
+			abnormal_length = len(abnormal)		
+			occurences = list(find_all(result, abnormal))
+			
+			while (len(occurences) > 0):
+				result = getRandomSubstring(length)
+				occurences = list(find_all(result, abnormal))
+
+			if len(occurences) == 0: 
+				pos = random.randint(0, length - abnormal_length)
+				result = result[:pos] + data['abnormalSequence'] + result[pos + abnormal_length:]
+
+				occurences = list(find_all(result, abnormal))
+				
+				if (len(occurences) != 1):
+					continue
+					
+		do_again = False
+
+		if 'removeSequences' in data:
+			while (getOccurencesCount(result, data['removeSequences']) != 0):
+				result = getRandomSubstring(length)
+
+				if 'abnormalSequence' in data:
+					do_again = True
+					break
+
+		if do_again:
+			continue
+		
+		if 'abnormalSequence' in data:
+			print(result.replace(abnormal, '_{0}_'.format(abnormal)))	
+		else:
+			print(result)
+		
+		break
+
 	return generateSegmentsFromString(result)
 
 def handleClass(name, data):

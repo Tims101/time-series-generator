@@ -29,6 +29,7 @@ dataset = {
 			'count': 10,
 			#count of segments
 			'length': 10,		
+			'removeSequences': ['ABCD', 'CCDDHH']
 		},
 
 		#another type of trajectories
@@ -37,16 +38,18 @@ dataset = {
 			'count': 10,
 			#count of segments
 			'length': 10, 
-			'abnormalSequence': 'ABCD'
+			'abnormalSequence': 'ABCD',
+			'removeSequences': ['CCDDHH']
 		},
 
 		#another type of trajectories
-		'bad2_': {										
+		'bad2': {										
 			#count of creating trajectories
 			'count': 10,
 			#count of segments
 			'length': 10, 
-			'abnormalSequence': 'BBB'
+			'abnormalSequence': 'CCDDHH',
+			'removeSequences': ['ABCD']
 		}
 	}	
 }
