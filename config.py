@@ -8,9 +8,20 @@ from generate.segment.halfsquare import HalfSquareSegment
 
 #result path
 path = './generated_data'
+csv_header = ['time', 'row_1']
 
 #definition of creating dataset
 dataset = {
+	'gauss': {
+		'mu': 0,
+		'sigma': 2
+	},
+
+	'length_deformation': {
+		'max': 2,
+		'min': 1
+	},
+
 	'aliases': {
 		'A': CubeSegment(10),
 		'B': MinusCubeSegment(10),

@@ -1,13 +1,16 @@
 import os
 import csv
 import random
+import sys
 
 from generate.trajectory import Trajectory
 
 import config
 
-if not os.path.exists(config.path):
-	os.makedirs(config.path)	
+path = sys.argv[1] if len(sys.argv) == 2 else config.path
+
+if not os.path.exists(path):
+	os.makedirs(path)	
 
 aliases = config.dataset['aliases']
 alphabet = list(aliases.keys())
@@ -85,10 +88,10 @@ def generateSegments(data):
 		
 		break
 
-	return generateSegmentsFromString(result)
+	return (generateSegmentsFromString(result), result)
 
 def handleClass(name, data):
-	dir = os.path.join(config.path, name).replace("\\","/")
+	dir = os.path.join(path, name).replace("\\","/")
 	if not os.path.exists(dir):
 		os.makedirs(dir)
 
@@ -96,15 +99,29 @@ def handleClass(name, data):
 	if 'abnormalSequence' in data:	
 		print('Abnormal: {0}'.format(data['abnormalSequence']))
 	for i in range(data['count']):			
-		segments = generateSegments(data)
+		segments, str_segments = generateSegments(data)
 
 		trajectory = Trajectory(segments)	
 		result = trajectory.generate()
 
-		file = os.path.join(config.path, name, '{0}_{1}.csv'.format(name, i)).replace("\\","/")		
-		with open(file, "w") as f:
-		    writer = csv.writer(f, delimiter=';', lineterminator='\n')
+		file = os.path.join(path, name, '{0}_{1}_{2}.csv'.format(name, i, str_segments)).replace("\\","/")		
+		with open(file, "w") as f:			
+		    writer = csv.writer(f, delimiter=';', lineterminator=';\n')
+		    writer.writerow(config.csv_header)
 		    writer.writerows(result)
+
+
+if 'gauss' in config.dataset:
+	mu = config.dataset['gauss']['mu']
+	sigma = config.dataset['gauss']['sigma']
+	for segment in aliases.values():
+		segment.setGaussMuAndSigma(mu, sigma)
+
+if 'length_deformation' in config.dataset:
+	deformation = config.dataset['length_deformation']
+	for segment in aliases.values():
+		value = random.uniform(deformation['min'], deformation['max'])
+		segment.setStep(1 if value == 0 else 1 / value)	
 
 for name, data in config.dataset['classes'].items():
 	print('Handle class: {0}'.format(name))
