@@ -37,7 +37,7 @@ dataset = {
 		# first type of trajectories
 		'normal': {							
 			#count of creating trajectories
-			'count': 10,
+			'count': 2,
 			#count of segments
 			'length': 10,		
 			'removeSequences': ['ABCD', 'CCDDHH']
@@ -46,7 +46,7 @@ dataset = {
 		#another type of trajectories
 		'bad1': {										
 			#count of creating trajectories
-			'count': 10,
+			'count': 2,
 			#count of segments
 			'length': 10, 
 			'abnormalSequence': 'ABCD',
@@ -56,7 +56,7 @@ dataset = {
 		#another type of trajectories
 		'bad2': {										
 			#count of creating trajectories
-			'count': 10,
+			'count': 2,
 			#count of segments
 			'length': 10, 
 			'abnormalSequence': 'CCDDHH',
