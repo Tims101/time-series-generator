@@ -42,16 +42,22 @@ def getOccurencesCount(str, substrings):
 		count += len(list(find_all(str, substr)))
 	return count
 
-#very bad code
+def inject(s, substr):
+	pos = random.randint(0, len(s) - len(substr))
+	return s[:pos] + substr + s[pos + len(substr):]
+
+#very bad code (DO NOT USE IT!!!)
 def generateSegments(data):
 	length = data['length']	
 	result = getRandomSubstring(length)
 	do_again = False
 
-	while (True):
+	abnormal = data.get('abnormalSequence', None)
+	injectSequences = data.get('injectSequences', [])
+	removeSequences = data.get('removeSequences', [])
 
-		if 'abnormalSequence' in data:
-			abnormal = data['abnormalSequence']		
+	while (True):
+		if abnormal:	
 			abnormal_length = len(abnormal)		
 			occurences = list(find_all(result, abnormal))
 			
@@ -59,36 +65,56 @@ def generateSegments(data):
 				result = getRandomSubstring(length)
 				occurences = list(find_all(result, abnormal))
 
-			if len(occurences) == 0: 
-				pos = random.randint(0, length - abnormal_length)
-				result = result[:pos] + data['abnormalSequence'] + result[pos + abnormal_length:]
+			result = inject(result, abnormal)
+			occurences = list(find_all(result, abnormal))
 
-				occurences = list(find_all(result, abnormal))
-				
-				if (len(occurences) != 1):
-					continue
-					
+			if (len(occurences) != 1):
+				continue
+
 		do_again = False
 
-		if 'removeSequences' in data:
-			while (getOccurencesCount(result, data['removeSequences']) != 0):
-				result = getRandomSubstring(length)
+		for s in injectSequences:
+			result = inject(result, s)
 
-				if 'abnormalSequence' in data:
-					do_again = True
-					break
+		while (getOccurencesCount(result, data['removeSequences']) != 0):
+			result = getRandomSubstring(length)
+
+			if abnormal:
+				do_again = True
+				break
 
 		if do_again:
 			continue
 		
-		if 'abnormalSequence' in data:
+		if abnormal:
 			print(result.replace(abnormal, '_{0}_'.format(abnormal)))	
+		elif injectSequences:
+			s = result
+			for injected in injectSequences:
+				s = s.replace(injected, '<{0}>'.format(injected))
+			print(s)
 		else:
 			print(result)
 		
 		break
 
 	return (generateSegmentsFromString(result), result)
+
+def handleNormalClass(normal_data, classes):
+	
+	def getSubstrings(str):
+		result = []
+		for i in range(len(str) - 1):
+			result.append(str[i] + str[i+1])
+		return result
+
+	parts = []
+	for name, data in classes.items():
+		abnormalSequence = data.get('abnormalSequence', [])
+		parts += getSubstrings(abnormalSequence)
+
+	normal_data['injectSequences'] = list(set(parts))
+	return handleClass('normal', normal_data)
 
 def handleClass(name, data):
 	dir = os.path.join(path, name).replace("\\","/")
@@ -98,6 +124,8 @@ def handleClass(name, data):
 	print('Generate segments...')
 	if 'abnormalSequence' in data:	
 		print('Abnormal: {0}'.format(data['abnormalSequence']))
+	if 'injectSequences' in data:	
+		print('Injected: {0}'.format(', '.join(data['injectSequences'])))
 	for i in range(data['count']):			
 		segments, str_segments = generateSegments(data)
 
@@ -125,7 +153,10 @@ if 'length_deformation' in config.dataset:
 
 for name, data in config.dataset['classes'].items():
 	print('Handle class: {0}'.format(name))
-	handleClass(name, data)
+	if name == 'normal':
+		handleNormalClass(data, config.dataset['classes'])
+	else:
+		handleClass(name, data)
 	print('')
 
 print('Finished')
