@@ -1,7 +1,7 @@
 #!/bin/bash
 OUT=$1
 
-if !("$OUT")
+if [ $# -eq 0 ]
 then 
 	OUT="dataset"
 fi
