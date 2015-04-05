@@ -7,7 +7,8 @@ from generate.trajectory import Trajectory
 
 import config
 
-path = sys.argv[1] if len(sys.argv) == 2 else config.path
+path = sys.argv[1] if len(sys.argv) >= 2 else config.path
+forceAbnormal = sys.argv[2] if len(sys.argv) >= 3 else None
 
 if not os.path.exists(path):
 	os.makedirs(path)	
@@ -29,12 +30,11 @@ def generateSegmentsFromString(string):
 		result.append(aliases[char])
 	return result		
 
-def getRandomSubstring(length):
+def getStringFromAlphabet(length):
 	result = ''
 	for i in range(length):
 		result += random.choice(alphabet)
 	return result
-
 
 def getOccurencesCount(str, substrings):
 	count = 0
@@ -49,7 +49,7 @@ def inject(s, substr):
 #very bad code (DO NOT USE IT!!!)
 def generateSegments(data):
 	length = data['length']	
-	result = getRandomSubstring(length)
+	result = getStringFromAlphabet(length)
 	do_again = False
 
 	abnormal = data.get('abnormalSequence', None)
@@ -62,7 +62,7 @@ def generateSegments(data):
 			occurences = list(find_all(result, abnormal))
 			
 			while (len(occurences) > 0):
-				result = getRandomSubstring(length)
+				result = getStringFromAlphabet(length)
 				occurences = list(find_all(result, abnormal))
 
 			result = inject(result, abnormal)
@@ -77,7 +77,7 @@ def generateSegments(data):
 			result = inject(result, s)
 
 		while (getOccurencesCount(result, data['removeSequences']) != 0):
-			result = getRandomSubstring(length)
+			result = getStringFromAlphabet(length)
 
 			if abnormal:
 				do_again = True
@@ -150,6 +150,14 @@ if 'length_deformation' in config.dataset:
 	for segment in aliases.values():
 		value = random.uniform(deformation['min'], deformation['max'])
 		segment.setStep(1 if value == 0 else 1 / value)	
+
+if forceAbnormal:
+	print('Use abnormal: {0}'.format(forceAbnormal))
+	for name, data in config.dataset['classes'].items():
+		if name == 'normal':
+			config.dataset['classes']['normal']['removeSequences'] = [forceAbnormal]
+		else:
+			data['abnormalSequence'] = forceAbnormal
 
 for name, data in config.dataset['classes'].items():
 	print('Handle class: {0}'.format(name))
